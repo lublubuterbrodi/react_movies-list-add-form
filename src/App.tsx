@@ -4,6 +4,7 @@ import { MoviesList } from './components/MoviesList';
 import { NewMovie } from './components/NewMovie';
 import moviesFromServer from './api/movies.json';
 import { Movie } from './types/Movie';
+import { v4 as uuidv4 } from 'uuid'; // UUID library import
 
 export const App = () => {
   const [movies, setMovies] = useState<Movie[]>(moviesFromServer);
@@ -11,7 +12,7 @@ export const App = () => {
   const handleAddMovie = (newMovie: Movie) => {
     setMovies(prevMovies => [
       ...prevMovies,
-      { ...newMovie, id: prevMovies.length + 1 },
+      { ...newMovie, id: uuidv4() }, // Use UUID for generating unique ID
     ]);
   };
 
@@ -21,7 +22,7 @@ export const App = () => {
         <MoviesList movies={movies} />
       </div>
       <div className="sidebar">
-        <NewMovie onAdd={handleAddMovie} />
+        <NewMovie key={movies.length} onAdd={handleAddMovie} />
       </div>
     </div>
   );

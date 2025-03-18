@@ -1,9 +1,9 @@
 import { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid'; // Import uuid
 import { TextField } from '../TextField';
 import { Movie } from '../../types/Movie';
 
 const urlPattern =
-  // eslint-disable-next-line max-len
   /^((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=+$,\w]+@)?[A-Za-z0-9.-]+|(?:www\.|[-;:&=+$,\w]+@)[A-Za-z0-9.-]+)((?:\/[+~%/.\w-_]*)?\??(?:[-+=&;%@,.\w_]*)#?(?:[,.!/\\\w]*))?)$/;
 
 interface Props {
@@ -12,6 +12,7 @@ interface Props {
 
 export const NewMovie: React.FC<Props> = ({ onAdd }) => {
   const [movie, setMovie] = useState<Movie>({
+    id: '', // Added ID field
     title: '',
     description: '',
     imgUrl: '',
@@ -23,6 +24,10 @@ export const NewMovie: React.FC<Props> = ({ onAdd }) => {
 
   const handleChange = (name: keyof Movie, value: string) => {
     setMovie(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleBlur = (name: keyof Movie) => {
+    setTouched(prev => ({ ...prev, [name]: true }));
   };
 
   const isValid = (): boolean => {
@@ -42,9 +47,10 @@ export const NewMovie: React.FC<Props> = ({ onAdd }) => {
       return;
     }
 
-    onAdd({ ...movie });
+    onAdd({ ...movie, id: uuidv4() }); // Generate unique ID
 
     setMovie({
+      id: '', // Reset ID
       title: '',
       description: '',
       imgUrl: '',
@@ -63,6 +69,7 @@ export const NewMovie: React.FC<Props> = ({ onAdd }) => {
         label="Title"
         value={movie.title}
         onChange={value => handleChange('title', value)}
+        onBlur={() => handleBlur('title')}
         required
         data-cy="movie-title"
       />
@@ -75,6 +82,7 @@ export const NewMovie: React.FC<Props> = ({ onAdd }) => {
         label="Description"
         value={movie.description}
         onChange={value => handleChange('description', value)}
+        onBlur={() => handleBlur('description')}
         data-cy="movie-description"
       />
 
@@ -83,6 +91,7 @@ export const NewMovie: React.FC<Props> = ({ onAdd }) => {
         label="Image URL"
         value={movie.imgUrl}
         onChange={value => handleChange('imgUrl', value)}
+        onBlur={() => handleBlur('imgUrl')}
         required
         data-cy="movie-imgUrl"
       />
@@ -92,9 +101,10 @@ export const NewMovie: React.FC<Props> = ({ onAdd }) => {
 
       <TextField
         name="imdbUrl"
-        label="Imdb URL"
+        label="IMDB URL"
         value={movie.imdbUrl}
         onChange={value => handleChange('imdbUrl', value)}
+        onBlur={() => handleBlur('imdbUrl')}
         required
         data-cy="movie-imdbUrl"
       />
@@ -104,14 +114,22 @@ export const NewMovie: React.FC<Props> = ({ onAdd }) => {
 
       <TextField
         name="imdbId"
-        label="Imdb ID"
+        label="IMDB ID"
         value={movie.imdbId}
         onChange={value => handleChange('imdbId', value)}
+        onBlur={() => handleBlur('imdbId')}
         required
         data-cy="movie-imdbId"
       />
       {touched.imdbId && !movie.imdbId.trim() && (
         <p className="help is-danger">IMDB ID is required</p>
+      )}
+
+      {/* Grouped error messages for better UX */}
+      {!isValid() && (
+        <div className="help is-danger">
+          Please fix the errors before submitting.
+        </div>
       )}
 
       <div className="field is-grouped">
